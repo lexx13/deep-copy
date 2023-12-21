@@ -15,12 +15,13 @@ import (
 )
 
 var (
-	pointerReceiverF        = flag.Bool("pointer-receiver", false, "the generated receiver type")
-	maxDepthF               = flag.Int("maxdepth", 0, "max depth of deep copying")
-	methodF                 = flag.String("method", "DeepCopy", "deep copy method name")
-	returnInterfaceF        = flag.String("return-interface", "", "the generated return type of DeepCopy function")
-	returnInterfaceDepF     = flag.String("return-interface-dep", "", "return interface dep name")
-	returnInterfaceDepPathF = flag.String("return-interface-dep-path", "", "return interface dep path")
+	pointerReceiverF            = flag.Bool("pointer-receiver", false, "the generated receiver type")
+	maxDepthF                   = flag.Int("maxdepth", 0, "max depth of deep copying")
+	methodF                     = flag.String("method", "DeepCopy", "deep copy method name")
+	returnInterfaceF            = flag.String("return-interface", "", "the generated return type of DeepCopy function")
+	returnInterfaceDepF         = flag.String("return-interface-dep", "", "return interface dep name")
+	returnInterfaceDepPathF     = flag.String("return-interface-dep-path", "", "return interface dep path")
+	allowedCopyToAnotherStructF = flag.Bool("another-struct", false, "add parameter for copy to another struct. allowed only with pointer-receiver")
 
 	typesF     typesVal
 	skipsF     skipsVal
@@ -141,7 +142,7 @@ func main() {
 	}
 
 	sl := deepcopy.SkipLists(skipsF)
-	generator := deepcopy.NewGenerator(*pointerReceiverF, *methodF, sl, *maxDepthF, *returnInterfaceF, *returnInterfaceDepF, *returnInterfaceDepPathF, buildTagsF)
+	generator := deepcopy.NewGenerator(*pointerReceiverF, *methodF, sl, *maxDepthF, *allowedCopyToAnotherStructF, *returnInterfaceF, *returnInterfaceDepF, *returnInterfaceDepPathF, buildTagsF)
 
 	output, err := outputF.Open()
 	if err != nil {

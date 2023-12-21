@@ -34,12 +34,14 @@ type Generator struct {
 	buildTags       []string
 	returnInterface string
 
+	allowedCopyToAnotherStruct bool
+
 	imports map[string]string
 	fns     [][]byte
 }
 
 func NewGenerator(
-	isPtrRecv bool, methodName string, skipLists SkipLists, maxDepth int,
+	isPtrRecv bool, methodName string, skipLists SkipLists, maxDepth int, allowedCopyToAnotherStruct bool,
 	returnInterface, returnInterfaceDep, returnInterfaceDepPath string,
 	buildTags []string,
 ) Generator {
@@ -55,6 +57,8 @@ func NewGenerator(
 		skipLists:       skipLists,
 		buildTags:       buildTags,
 		returnInterface: returnInterface,
+
+		allowedCopyToAnotherStruct: allowedCopyToAnotherStruct,
 
 		imports: imports,
 		fns:     [][]byte{},
@@ -128,11 +132,29 @@ func (g Generator) generateFunc(p *packages.Package, obj object, skips skips, ge
 		returnValue = g.returnInterface
 	}
 
+	args := ""
+	if g.allowedCopyToAnotherStruct && g.isPtrRecv {
+		args = "opts ...any"
+	}
+
 	source := "o"
 	fmt.Fprintf(&buf, `// %s generates a deep copy of %s%s
-func (o %s%s) %s() %s {
-	var cp %s = %s%s
-`, g.methodName, ptr, kind, ptr, kind, g.methodName, returnValue, kind, ptr, source)
+func (o %s%s) %s(%s) %s {
+`, g.methodName, ptr, kind, ptr, kind, g.methodName, args, returnValue)
+
+	if g.allowedCopyToAnotherStruct && g.isPtrRecv {
+		fmt.Fprintf(&buf, `	var cp %s%s
+	if len(opts) > 0 {
+		cp = opts[0].(%s%s)
+	} else {
+		m := *o
+		cp = &m
+	}
+`, ptr, kind, ptr, kind)
+	} else {
+		fmt.Fprintf(&buf, `	var cp %s = %s%s
+`, kind, ptr, source)
+	}
 
 	g.walkType(source, "cp", p.Name, obj, &buf, skips, generating, 0)
 
