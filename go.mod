@@ -1,4 +1,4 @@
-module github.com/globusdigital/deep-copy
+module github.com/lexx13/deep-copy
 
 go 1.20
 

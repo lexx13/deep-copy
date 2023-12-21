@@ -11,7 +11,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"github.com/globusdigital/deep-copy/deepcopy"
+	"github.com/lexx13/deep-copy/deepcopy"
 )
 
 var (

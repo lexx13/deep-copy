@@ -4,7 +4,7 @@ import (
 	"log"
 	"reflect"
 
-	. "github.com/globusdigital/deep-copy/testdata"
+	. "github.com/lexx13/deep-copy/testdata"
 )
 
 func main() {
