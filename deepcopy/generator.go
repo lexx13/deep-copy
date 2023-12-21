@@ -158,7 +158,7 @@ func (o %s%s) %s(%s) %s {
 
 	g.walkType(source, "cp", p.Name, obj, &buf, skips, generating, 0)
 
-	if g.isPtrRecv {
+	if g.isPtrRecv && !g.allowedCopyToAnotherStruct {
 		buf.WriteString("return &cp\n}")
 	} else {
 		buf.WriteString("return cp\n}")
