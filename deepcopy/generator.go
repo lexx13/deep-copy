@@ -27,27 +27,36 @@ func (l SkipLists) Get(i int) (s skips) {
 }
 
 type Generator struct {
-	isPtrRecv  bool
-	maxDepth   int
-	methodName string
-	skipLists  SkipLists
-	buildTags  []string
+	isPtrRecv       bool
+	maxDepth        int
+	methodName      string
+	skipLists       SkipLists
+	buildTags       []string
+	returnInterface string
 
 	imports map[string]string
 	fns     [][]byte
 }
 
 func NewGenerator(
-	isPtrRecv bool, methodName string, skipLists SkipLists, maxDepth int, buildTags []string,
+	isPtrRecv bool, methodName string, skipLists SkipLists, maxDepth int,
+	returnInterface, returnInterfaceDep, returnInterfaceDepPath string,
+	buildTags []string,
 ) Generator {
-	return Generator{
-		isPtrRecv:  isPtrRecv,
-		methodName: methodName,
-		maxDepth:   maxDepth,
-		skipLists:  skipLists,
-		buildTags:  buildTags,
+	imports := map[string]string{}
+	if returnInterfaceDep != "" && returnInterfaceDepPath != "" {
+		imports[returnInterfaceDep] = returnInterfaceDepPath
+	}
 
-		imports: map[string]string{},
+	return Generator{
+		isPtrRecv:       isPtrRecv,
+		methodName:      methodName,
+		maxDepth:        maxDepth,
+		skipLists:       skipLists,
+		buildTags:       buildTags,
+		returnInterface: returnInterface,
+
+		imports: imports,
 		fns:     [][]byte{},
 	}
 }
@@ -114,11 +123,16 @@ func (g Generator) generateFunc(p *packages.Package, obj object, skips skips, ge
 	}
 	kind := obj.Obj().Name()
 
+	returnValue := fmt.Sprintf("%s%s", ptr, kind)
+	if g.returnInterface != "" {
+		returnValue = g.returnInterface
+	}
+
 	source := "o"
 	fmt.Fprintf(&buf, `// %s generates a deep copy of %s%s
-func (o %s%s) %s() %s%s {
+func (o %s%s) %s() %s {
 	var cp %s = %s%s
-`, g.methodName, ptr, kind, ptr, kind, g.methodName, ptr, kind, kind, ptr, source)
+`, g.methodName, ptr, kind, ptr, kind, g.methodName, returnValue, kind, ptr, source)
 
 	g.walkType(source, "cp", p.Name, obj, &buf, skips, generating, 0)
 

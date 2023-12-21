@@ -5,8 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/globusdigital/deep-copy/deepcopy"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/globusdigital/deep-copy/deepcopy"
 )
 
 func Test_run(t *testing.T) {
@@ -53,7 +54,7 @@ func Test_run(t *testing.T) {
 				method = tt.method
 			}
 			g := deepcopy.NewGenerator(tt.pointer, method,
-				deepcopy.SkipLists(tt.skips), tt.maxdepth, tt.buildTags)
+				deepcopy.SkipLists(tt.skips), tt.maxdepth, "", "", "", tt.buildTags)
 			var buf bytes.Buffer
 			err := run(g, &buf, tt.path, tt.types)
 			if err != nil {
