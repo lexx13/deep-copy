@@ -146,6 +146,7 @@ func (o %s%s) %s(%s) %s {
 		fmt.Fprintf(&buf, `	var cp %s%s
 	if len(opts) > 0 {
 		cp = opts[0].(%s%s)
+		*cp = *o
 	} else {
 		m := *o
 		cp = &m
